@@ -13,7 +13,6 @@
             --type-color: #4ec9b0;
             --string-color: #ce9178;
             --comment-color: #6a9955;
-            --accent: #007acc;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -60,10 +59,9 @@
             font-size: 14px;
             line-height: 1.5;
         }
-        /* C# Syntax Highlighting Simplificat */
         .kw { color: var(--keyword-color); }
         .type { color: var(--type-color); }
-        .com { color: var(--comment-color); }
+        .str { color: var(--string-color); }
     </style>
 </head>
 <body>
@@ -71,7 +69,7 @@
     <div class="container">
         <header>
             <h1>RomaniaSMP</h1>
-            <p>Codul sursă C# pentru proiectul nostru de joc</p>
+            <p>Codul sursă C# pentru proiectul tău</p>
         </header>
 
         <!-- Camera.cs -->
@@ -135,10 +133,17 @@
     {
         <span class="type">Vector3</span> movement = <span class="type">Vector3</span>.Zero;
 
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="string">"W"</span>)) movement.Z -= 1;
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="string">"S"</span>)) movement.Z += 1;
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="string">"A"</span>)) movement.X -= 1;
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="string">"D"</span>)) movement.X += 1;
+        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"W"</span>))
+            movement.Z -= 1;
+
+        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"S"</span>))
+            movement.Z += 1;
+
+        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"A"</span>))
+            movement.X -= 1;
+
+        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"D"</span>))
+            movement.X += 1;
 
         <span class="kw">if</span> (movement != <span class="type">Vector3</span>.Zero)
         {
@@ -160,10 +165,13 @@
     {
         <span class="type">World</span> world = <span class="kw">new</span> <span class="type">World</span>();
 
-        Console.WriteLine(<span class="string">"================================"</span>);
-        Console.WriteLine(<span class="string">"       ROMANIA SMP"</span>);
-        Console.WriteLine(<span class="string">"================================"</span>);
-        Console.WriteLine(<span class="string">"Joc pornit! WASD = miscare"</span>);
+        Console.WriteLine(<span class="str">"================================"</span>);
+        Console.WriteLine(<span class="str">"       ROMANIA SMP"</span>);
+        Console.WriteLine(<span class="str">"================================"</span>);
+        Console.WriteLine();
+        Console.WriteLine(<span class="str">"Joc pornit!"</span>);
+        Console.WriteLine(<span class="str">"WASD = miscare"</span>);
+        Console.WriteLine();
 
         <span class="kw">while</span> (<span class="kw">true</span>)
         {
@@ -190,17 +198,21 @@
     {
         Player = <span class="kw">new</span> <span class="type">Player</span>();
         Camera = <span class="kw">new</span> <span class="type">Camera</span>();
+
         NPCs = <span class="kw">new</span> <span class="type">List</span>&lt;<span class="type">NPC</span>&gt;();
 
         <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; 10; i++)
         {
-            NPCs.Add(<span class="kw">new</span> <span class="type">NPC</span>(<span class="kw">new</span> <span class="type">Vector3</span>(i * 3, 0, 5)));
+            NPCs.Add(
+                <span class="kw">new</span> <span class="type">NPC</span>(<span class="kw">new</span> <span class="type">Vector3</span>(i * 3, 0, 5))
+            );
         }
     }
 
     <span class="kw">public void</span> Update(<span class="kw">float</span> deltaTime)
     {
         Player.Update(deltaTime);
+
         Camera.Follow(Player.Position);
 
         <span class="kw">foreach</span> (<span class="type">NPC</span> npc <span class="kw">in</span> NPCs)
