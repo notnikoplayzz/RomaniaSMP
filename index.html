@@ -2,162 +2,217 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Romania SMP - City Map</title>
+    <title>Romania SMP - Hyper Realistic City</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #050505;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            background-color: #020305;
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            color: #fff;
             user-select: none;
         }
-        #info {
+        #hud {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(10, 10, 15, 0.85);
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 12, 18, 0.8);
+            backdrop-filter: blur(10px);
             padding: 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             pointer-events: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
         }
-        h2 { margin: 0 0 8px 0; color: #3498db; letter-spacing: 1px; }
-        p { margin: 4px 0; font-size: 14px; color: #ccc; }
+        h1 { margin: 0 0 5px 0; font-size: 18px; color: #3498db; letter-spacing: 2px; }
+        p { margin: 4px 0; font-size: 13px; color: #a0a0a0; }
+        .key { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #fff; font-family: monospace; }
     </style>
-    <!-- Three.js și OrbitControls pentru mișcarea camerei cu mouse-ul -->
+    <!-- Three.js și OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
-    <div id="info">
-        <h2>ROMANIA SMP: CITY</h2>
-        <p>Joc pornit!</p>
-        <p><b>WASD</b> = Mișcare Jucător</p>
-        <p><b>Click Stânga + Drag</b> = Rotire Cameră</p>
-        <p><b>Rotiță Mouse</b> = Zoom In / Out</p>
+    <div id="hud">
+        <h1>ROMANIA SMP: CYBER CITY</h1>
+        <p>Mișcare: <span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span></p>
+        <p>Cameră: <span class="key">Click Stânga + Drag</span></p>
+        <p>Zoom: <span class="key">Rotiță Mouse</span></p>
     </div>
 
     <script>
-        // --- SCENĂ, RENDERER & ILUMINARE ---
+        // --- SCENĂ & MOTOR GRAFIC AVANSAT ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0b0e14);
-        scene.fog = new THREE.FogExp2(0x0b0e14, 0.015);
+        scene.background = new THREE.Color(0x030508);
+        scene.fog = new THREE.FogExp2(0x030508, 0.012);
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
         document.body.appendChild(renderer.domElement);
 
-        // Control cameră cu mouse-ul
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.maxPolarAngle = Math.PI / 2 - 0.05; // Să nu treacă sub pământ
-        controls.minDistance = 2;
-        controls.maxDistance = 30;
+        controls.dampingFactor = 0.04;
+        controls.maxPolarAngle = Math.PI / 2 - 0.02;
+        controls.minDistance = 3;
+        controls.maxDistance = 35;
 
-        // Lumini
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        // --- ILUMINAT CINEMATOGRAPHIC ---
+        const ambientLight = new THREE.AmbientLight(0x0a1128, 1.5);
         scene.add(ambientLight);
 
-        const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        sunLight.position.set(30, 50, 20);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        scene.add(sunLight);
+        // Lună / Lumină principală direcțională
+        const moonLight = new THREE.DirectionalLight(0x74b9ff, 0.8);
+        moonLight.position.set(40, 60, -30);
+        moonLight.castShadow = true;
+        moonLight.shadow.mapSize.width = 4096;
+        moonLight.shadow.mapSize.height = 4096;
+        moonLight.shadow.camera.near = 0.5;
+        moonLight.shadow.camera.far = 250;
+        const d = 70;
+        moonLight.shadow.camera.left = -d;
+        moonLight.shadow.camera.right = d;
+        moonLight.shadow.camera.top = d;
+        moonLight.shadow.camera.bottom = -d;
+        moonLight.shadow.bias = -0.0005;
+        scene.add(moonLight);
 
-        // --- GENERARE ORAȘ (PODEA, STRĂZI, CLĂDIRI) ---
-        function createCity() {
-            // Sol / Asfalt principal
-            const groundGeo = new THREE.PlaneGeometry(200, 200);
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 });
+        // --- GENERARE ORAȘ REALIST ---
+        function createRealisticCity() {
+            // Sol asfalt realist (textură procedurală fină prin materiale)
+            const groundGeo = new THREE.PlaneGeometry(300, 300);
+            const groundMat = new THREE.MeshStandardMaterial({ 
+                color: 0x111317, 
+                roughness: 0.9,
+                metalness: 0.1 
+            });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // Străzi în cruce (Bulevarde)
-            const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+            // Bulevard principal în cruce
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1d24, roughness: 0.7 });
             
-            const roadXGeo = new THREE.PlaneGeometry(200, 10);
-            const roadX = new THREE.Mesh(roadXGeo, roadMat);
+            const roadX = new THREE.Mesh(new THREE.PlaneGeometry(300, 12), roadMat);
             roadX.rotation.x = -Math.PI / 2;
             roadX.position.y = 0.01;
             roadX.receiveShadow = true;
             scene.add(roadX);
 
-            const roadZGeo = new THREE.PlaneGeometry(10, 200);
-            const roadZ = new THREE.Mesh(roadZGeo, roadMat);
+            const roadZ = new THREE.Mesh(new THREE.PlaneGeometry(12, 300), roadMat);
+            roadZ.rotation.x = -Math.PI / 2;
             roadZ.position.y = 0.01;
             roadZ.receiveShadow = true;
             scene.add(roadZ);
 
-            // Linie galbenă mijloc
+            // Marcaje rutiere luminoase
             const lineMat = new THREE.MeshBasicMaterial({ color: 0xf1c40f });
-            const lineGeoX = new THREE.PlaneGeometry(200, 0.3);
-            const lineX = new THREE.Mesh(lineGeoX, lineMat);
+            const lineX = new THREE.Mesh(new THREE.PlaneGeometry(300, 0.4), lineMat);
             lineX.rotation.x = -Math.PI / 2;
             lineX.position.y = 0.02;
             scene.add(lineX);
 
-            // Generare clădiri realiste pe cartiere
-            const buildingColors = [0x34495e, 0x2c3e50, 0x7f8c8d, 0x95a5a6, 0x16a085];
-            
-            for (let x = -80; x <= 80; x += 14) {
-                for (let z = -80; z <= 80; z += 14) {
-                    // Evităm mijlocul străzilor
-                    if (Math.abs(x) < 12 || Math.abs(z) < 12) continue;
+            // Generare clădiri detaliate cu ferestre luminate
+            const buildingMatColors = [0x1f242d, 0x252a34, 0x161922, 0x2a313c];
 
-                    let bWidth = 10;
-                    let bDepth = 10;
-                    let bHeight = 10 + Math.random() * 30;
+            for (let x = -100; x <= 100; x += 16) {
+                for (let z = -100; z <= 100; z += 16) {
+                    if (Math.abs(x) < 14 || Math.abs(z) < 14) continue; // Evităm strada
 
+                    let bWidth = 11;
+                    let bDepth = 11;
+                    let bHeight = 15 + Math.random() * 45;
+
+                    const group = new THREE.Group();
+
+                    // Corpul clădirii
                     const bGeo = new THREE.BoxGeometry(bWidth, bHeight, bDepth);
                     const bMat = new THREE.MeshStandardMaterial({ 
-                        color: buildingColors[Math.floor(Math.random() * buildingColors.length)],
-                        roughness: 0.5,
-                        metalness: 0.2
+                        color: buildingMatColors[Math.floor(Math.random() * buildingMatColors.length)],
+                        roughness: 0.3,
+                        metalness: 0.4
+                    });
+                    const buildingMesh = new THREE.Mesh(bGeo, bMat);
+                    buildingMesh.castShadow = true;
+                    buildingMesh.receiveShadow = true;
+                    group.add(buildingMesh);
+
+                    // Adăugare ferestre luminate procedural (grișuri de luminițe galbene/albe)
+                    const windowMat = new THREE.MeshBasicMaterial({ 
+                        color: Math.random() > 0.3 ? 0xffeb3b : 0x00bcd4 
                     });
                     
-                    const building = new THREE.Mesh(bGeo, bMat);
-                    building.position.set(x, bHeight / 2, z);
-                    building.castShadow = true;
-                    building.receiveShadow = true;
-                    scene.add(building);
+                    for (let wy = -bHeight / 2 + 3; wy < bHeight / 2 - 2; wy += 3) {
+                        if (Math.random() > 0.4) {
+                            const winGeo = new THREE.PlaneGeometry(0.8, 1.2);
+                            // Fațada față
+                            const winF = new THREE.Mesh(winGeo, windowMat);
+                            winF.position.set(0, wy, bDepth / 2 + 0.01);
+                            group.add(winF);
+                            // Fațada laterală
+                            const winS = new THREE.Mesh(winGeo, windowMat);
+                            winS.rotation.y = Math.PI / 2;
+                            winS.position.set(bWidth / 2 + 0.01, wy, 0);
+                            group.add(winS);
+                        }
+                    }
 
-                    // Adăugăm lumini pentru ferestre (simplificat prin mici puncte luminoase sau detalii)
+                    group.position.set(x, bHeight / 2, z);
+                    scene.add(group);
+
+                    // Stâlp de iluminat stradal ocazional
+                    if (Math.random() > 0.7) {
+                        createStreetLight(x - 7, z - 7);
+                    }
                 }
             }
         }
-        createCity();
 
-        // --- CLASA PLAYER ---
+        function createStreetLight(x, z) {
+            const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 6);
+            const poleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 });
+            const pole = new THREE.Mesh(poleGeo, poleMat);
+            pole.position.set(x, 3, z);
+            scene.add(pole);
+
+            // Lumină caldă de stradă
+            const light = new THREE.PointLight(0xffaa44, 1.5, 12);
+            light.position.set(x, 5.8, z);
+            scene.add(light);
+        }
+
+        createRealisticCity();
+
+        // --- PLAYER 3D DETALIAT ---
         class Player {
             constructor() {
-                this.position = new THREE.Vector3(0, 0.5, 0);
-                this.speed = 6;
+                this.position = new THREE.Vector3(0, 0, 0);
+                this.speed = 7;
                 
-                // Jucător mai detaliat (corp + cap)
                 const group = new THREE.Group();
 
-                const bodyGeo = new THREE.BoxGeometry(0.8, 1.2, 0.5);
-                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.3 });
+                // Corp
+                const bodyGeo = new THREE.BoxGeometry(0.6, 1.0, 0.35);
+                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0984e3, roughness: 0.2, metalness: 0.5 });
                 const body = new THREE.Mesh(bodyGeo, bodyMat);
-                body.position.y = 0.6;
+                body.position.y = 0.5;
                 body.castShadow = true;
                 group.add(body);
 
-                const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-                const headMat = new THREE.MeshStandardMaterial({ color: 0xf1c27d });
+                // Cap
+                const headGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
+                const headMat = new THREE.MeshStandardMaterial({ color: 0xffdbac, roughness: 0.6 });
                 const head = new THREE.Mesh(headGeo, headMat);
-                head.position.y = 1.45;
+                head.position.y = 1.25;
                 head.castShadow = true;
                 group.add(head);
 
@@ -178,54 +233,47 @@
                     movement.normalize();
                     this.position.addScaledVector(movement, this.speed * deltaTime);
                     
-                    // Limite pe hartă
-                    this.position.x = Math.max(-90, Math.min(90, this.position.x));
-                    this.position.z = Math.max(-90, Math.min(90, this.position.z));
+                    // Limite hartă
+                    this.position.x = Math.max(-140, Math.min(140, this.position.x));
+                    this.position.z = Math.max(-140, Math.min(140, this.position.z));
 
                     this.mesh.position.copy(this.position);
                     
-                    // Rotație lină spre direcția de mers
                     let angle = Math.atan2(movement.x, movement.z);
                     this.mesh.rotation.y = angle;
                 }
             }
         }
 
-        // --- CLASA NPC ---
+        // --- NPC-URI (PIETONI / MAȘINI SIMULATE) ---
         class NPC {
             constructor(position) {
                 this.position = position;
-                this.speed = 2;
+                this.speed = 2.5 + Math.random();
 
-                const geo = new THREE.BoxGeometry(0.7, 1.4, 0.7);
-                const mat = new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.4 });
+                const geo = new THREE.BoxGeometry(0.6, 1.2, 0.6);
+                const mat = new THREE.MeshStandardMaterial({ color: 0xd63031, roughness: 0.3 });
                 this.mesh = new THREE.Mesh(geo, mat);
                 this.mesh.position.copy(this.position);
-                this.mesh.position.y = 0.7;
+                this.mesh.position.y = 0.6;
                 this.mesh.castShadow = true;
                 scene.add(this.mesh);
             }
 
             update(deltaTime) {
                 this.position.x += this.speed * deltaTime;
-
-                if (this.position.x > 35) {
-                    this.position.x = -35;
-                }
-
+                if (this.position.x > 50) this.position.x = -50;
                 this.mesh.position.x = this.position.x;
             }
         }
 
-        // --- INITIALIZARE JOC ---
         const player = new Player();
-        
         const npcs = [];
-        for (let i = 0; i < 15; i++) {
-            npcs.push(new NPC(new THREE.Vector3((i * 5) - 35, 0, (Math.random() - 0.5) * 10)));
+        for (let i = 0; i < 20; i++) {
+            npcs.push(new NPC(new THREE.Vector3((Math.random() - 0.5) * 80, 0, (Math.random() - 0.5) * 20)));
         }
 
-        // Taste apăsate
+        // Control taste
         const keys = {};
         window.addEventListener('keydown', (e) => keys[e.code] = true);
         window.addEventListener('keyup', (e) => keys[e.code] = false);
@@ -240,14 +288,13 @@
             if (deltaTime > 0.1) deltaTime = 0.016;
             lastTime = currentTime;
 
-            // Actualizare entități
             player.update(deltaTime, keys);
             for (let npc of npcs) {
                 npc.update(deltaTime);
             }
 
-            // Camera urmărește jucătorul menținând controlul mouse-ului activ
-            controls.target.set(player.position.x, player.position.y + 1, player.position.z);
+            // Camera urmărește lin jucătorul
+            controls.target.lerp(new THREE.Vector3(player.position.x, player.position.y + 0.8, player.position.z), 0.1);
             controls.update();
 
             renderer.render(scene, camera);
@@ -255,7 +302,6 @@
 
         requestAnimationFrame(animate);
 
-        // Responsivitate ferestre
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
