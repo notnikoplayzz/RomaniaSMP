@@ -2,176 +2,260 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Romania SMP</title>
+    <title>Romania SMP - City Map</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #111;
-            font-family: sans-serif;
+            background-color: #050505;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
+            user-select: none;
         }
         #info {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 8px;
+            top: 15px;
+            left: 15px;
+            background: rgba(10, 10, 15, 0.85);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        h2 { margin: 0 0 10px 0; color: #f39c12; }
+        h2 { margin: 0 0 8px 0; color: #3498db; letter-spacing: 1px; }
+        p { margin: 4px 0; font-size: 14px; color: #ccc; }
     </style>
-    <!-- Încărcăm Three.js din CDN -->
+    <!-- Three.js și OrbitControls pentru mișcarea camerei cu mouse-ul -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
     <div id="info">
-        <h2>ROMANIA SMP</h2>
+        <h2>ROMANIA SMP: CITY</h2>
         <p>Joc pornit!</p>
-        <p>Folosește tastele <b>W, A, S, D</b> pentru mișcare.</p>
+        <p><b>WASD</b> = Mișcare Jucător</p>
+        <p><b>Click Stânga + Drag</b> = Rotire Cameră</p>
+        <p><b>Rotiță Mouse</b> = Zoom In / Out</p>
     </div>
 
     <script>
-        // --- CLASA PLAYER ---[cite: 3]
+        // --- SCENĂ, RENDERER & ILUMINARE ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b0e14);
+        scene.fog = new THREE.FogExp2(0x0b0e14, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // Control cameră cu mouse-ul
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2 - 0.05; // Să nu treacă sub pământ
+        controls.minDistance = 2;
+        controls.maxDistance = 30;
+
+        // Lumini
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        sunLight.position.set(30, 50, 20);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        scene.add(sunLight);
+
+        // --- GENERARE ORAȘ (PODEA, STRĂZI, CLĂDIRI) ---
+        function createCity() {
+            // Sol / Asfalt principal
+            const groundGeo = new THREE.PlaneGeometry(200, 200);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Străzi în cruce (Bulevarde)
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+            
+            const roadXGeo = new THREE.PlaneGeometry(200, 10);
+            const roadX = new THREE.Mesh(roadXGeo, roadMat);
+            roadX.rotation.x = -Math.PI / 2;
+            roadX.position.y = 0.01;
+            roadX.receiveShadow = true;
+            scene.add(roadX);
+
+            const roadZGeo = new THREE.PlaneGeometry(10, 200);
+            const roadZ = new THREE.Mesh(roadZGeo, roadMat);
+            roadZ.position.y = 0.01;
+            roadZ.receiveShadow = true;
+            scene.add(roadZ);
+
+            // Linie galbenă mijloc
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0xf1c40f });
+            const lineGeoX = new THREE.PlaneGeometry(200, 0.3);
+            const lineX = new THREE.Mesh(lineGeoX, lineMat);
+            lineX.rotation.x = -Math.PI / 2;
+            lineX.position.y = 0.02;
+            scene.add(lineX);
+
+            // Generare clădiri realiste pe cartiere
+            const buildingColors = [0x34495e, 0x2c3e50, 0x7f8c8d, 0x95a5a6, 0x16a085];
+            
+            for (let x = -80; x <= 80; x += 14) {
+                for (let z = -80; z <= 80; z += 14) {
+                    // Evităm mijlocul străzilor
+                    if (Math.abs(x) < 12 || Math.abs(z) < 12) continue;
+
+                    let bWidth = 10;
+                    let bDepth = 10;
+                    let bHeight = 10 + Math.random() * 30;
+
+                    const bGeo = new THREE.BoxGeometry(bWidth, bHeight, bDepth);
+                    const bMat = new THREE.MeshStandardMaterial({ 
+                        color: buildingColors[Math.floor(Math.random() * buildingColors.length)],
+                        roughness: 0.5,
+                        metalness: 0.2
+                    });
+                    
+                    const building = new THREE.Mesh(bGeo, bMat);
+                    building.position.set(x, bHeight / 2, z);
+                    building.castShadow = true;
+                    building.receiveShadow = true;
+                    scene.add(building);
+
+                    // Adăugăm lumini pentru ferestre (simplificat prin mici puncte luminoase sau detalii)
+                }
+            }
+        }
+        createCity();
+
+        // --- CLASA PLAYER ---
         class Player {
             constructor() {
                 this.position = new THREE.Vector3(0, 0.5, 0);
-                this.speed = 5;
+                this.speed = 6;
                 
-                // Creăm reprezentarea vizuală (un cub albastru)
-                const geometry = new THREE.BoxGeometry(1, 1, 1);
-                const material = new THREE.MeshBasicMaterial({ color: 0x3498db });
-                this.mesh = new THREE.Mesh(geometry, material);
+                // Jucător mai detaliat (corp + cap)
+                const group = new THREE.Group();
+
+                const bodyGeo = new THREE.BoxGeometry(0.8, 1.2, 0.5);
+                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.3 });
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                body.position.y = 0.6;
+                body.castShadow = true;
+                group.add(body);
+
+                const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const headMat = new THREE.MeshStandardMaterial({ color: 0xf1c27d });
+                const head = new THREE.Mesh(headGeo, headMat);
+                head.position.y = 1.45;
+                head.castShadow = true;
+                group.add(head);
+
+                this.mesh = group;
                 this.mesh.position.copy(this.position);
+                scene.add(this.mesh);
             }
 
-            update(deltaTime, keys, bounds) {
+            update(deltaTime, keys) {
                 let movement = new THREE.Vector3(0, 0, 0);
 
-                if (keys['KeyW']) movement.z -= 1;
-                if (keys['KeyS']) movement.z += 1;
-                if (keys['KeyA']) movement.x -= 1;
-                if (keys['KeyD']) movement.x += 1;
+                if (keys['KeyW'] || keys['ArrowUp']) movement.z -= 1;
+                if (keys['KeyS'] || keys['ArrowDown']) movement.z += 1;
+                if (keys['KeyA'] || keys['ArrowLeft']) movement.x -= 1;
+                if (keys['KeyD'] || keys['ArrowRight']) movement.x += 1;
 
                 if (movement.length() > 0) {
                     movement.normalize();
                     this.position.addScaledVector(movement, this.speed * deltaTime);
+                    
+                    // Limite pe hartă
+                    this.position.x = Math.max(-90, Math.min(90, this.position.x));
+                    this.position.z = Math.max(-90, Math.min(90, this.position.z));
+
                     this.mesh.position.copy(this.position);
+                    
+                    // Rotație lină spre direcția de mers
+                    let angle = Math.atan2(movement.x, movement.z);
+                    this.mesh.rotation.y = angle;
                 }
             }
         }
 
-        // --- CLASA NPC ---[cite: 2]
+        // --- CLASA NPC ---
         class NPC {
             constructor(position) {
                 this.position = position;
-                this.speed = 1.5;
+                this.speed = 2;
 
-                // Creăm reprezentarea vizuală (un cub roșu)
-                const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-                const material = new THREE.MeshBasicMaterial({ color: 0xe74c3c });
-                this.mesh = new THREE.Mesh(geometry, material);
+                const geo = new THREE.BoxGeometry(0.7, 1.4, 0.7);
+                const mat = new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.4 });
+                this.mesh = new THREE.Mesh(geo, mat);
                 this.mesh.position.copy(this.position);
+                this.mesh.position.y = 0.7;
+                this.mesh.castShadow = true;
+                scene.add(this.mesh);
             }
 
             update(deltaTime) {
                 this.position.x += this.speed * deltaTime;
 
-                if (this.position.x > 20) {
-                    this.position.x = -20;
+                if (this.position.x > 35) {
+                    this.position.x = -35;
                 }
 
-                this.mesh.position.copy(this.position);
+                this.mesh.position.x = this.position.x;
             }
         }
 
-        // --- CLASA CAMERA ---[cite: 1]
-        class CameraSystem {
-            constructor(threeCamera) {
-                this.camera = threeCamera;
-                this.distance = 6;
-                this.height = 3;
-            }
-
-            follow(playerPosition) {
-                this.camera.position.set(
-                    playerPosition.x,
-                    playerPosition.y + this.height,
-                    playerPosition.z + this.distance
-                );
-                this.camera.lookAt(playerPosition);
-            }
+        // --- INITIALIZARE JOC ---
+        const player = new Player();
+        
+        const npcs = [];
+        for (let i = 0; i < 15; i++) {
+            npcs.push(new NPC(new THREE.Vector3((i * 5) - 35, 0, (Math.random() - 0.5) * 10)));
         }
 
-        // --- CLASA WORLD ---[cite: 5]
-        class World {
-            constructor(scene) {
-                this.scene = scene;
-                this.player = new Player();
-                this.scene.add(this.player.mesh);
-
-                this.npcs = [];
-                for (let i = 0; i < 10; i++) {
-                    let npc = new NPC(new THREE.Vector3(i * 3 - 15, 0.4, 5));
-                    this.npcs.push(npc);
-                    this.scene.add(npc.mesh);
-                }
-
-                // Podea simplă pentru orientare
-                const floorGeo = new THREE.PlaneGeometry(50, 50);
-                const floorMat = new THREE.MeshBasicMaterial({ color: 0x27ae60, side: THREE.DoubleSide });
-                const floor = new THREE.Mesh(floorGeo, floorMat);
-                floor.rotation.x = Math.PI / 2;
-                floor.position.y = -0.5;
-                this.scene.add(floor);
-            }
-
-            update(deltaTime, keys) {
-                this.player.update(deltaTime, keys);
-
-                for (let npc of this.npcs) {
-                    npc.update(deltaTime);
-                }
-            }
-        }
-
-        // --- CONFIGURARE SCENĂ THREE.JS & GAME LOOP ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        const world = new World(scene);
-        const cameraSystem = new CameraSystem(camera);
-
-        // Gestionare taste apăsate
+        // Taste apăsate
         const keys = {};
         window.addEventListener('keydown', (e) => keys[e.code] = true);
         window.addEventListener('keyup', (e) => keys[e.code] = false);
 
-        // Bucla principală de joc (Game Loop)
+        // --- GAME LOOP ---
         let lastTime = performance.now();
 
         function animate(currentTime) {
             requestAnimationFrame(animate);
 
             let deltaTime = (currentTime - lastTime) / 1000;
-            if (deltaTime > 0.1) deltaTime = 0.016; // Limitare pentru siguranță
+            if (deltaTime > 0.1) deltaTime = 0.016;
             lastTime = currentTime;
 
-            // Actualizare lume și cameră[cite: 1, 5]
-            world.update(deltaTime, keys);
-            cameraSystem.follow(world.player.position);
+            // Actualizare entități
+            player.update(deltaTime, keys);
+            for (let npc of npcs) {
+                npc.update(deltaTime);
+            }
+
+            // Camera urmărește jucătorul menținând controlul mouse-ului activ
+            controls.target.set(player.position.x, player.position.y + 1, player.position.z);
+            controls.update();
 
             renderer.render(scene, camera);
         }
 
         requestAnimationFrame(animate);
 
-        // Responsivitate la redimensionarea ferestrei
+        // Responsivitate ferestre
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
