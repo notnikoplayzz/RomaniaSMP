@@ -2,228 +2,181 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RomaniaSMP - Coduri C#</title>
+    <title>Romania SMP</title>
     <style>
-        :root {
-            --bg-color: #1e1e1e;
-            --panel-bg: #252526;
-            --text-color: #d4d4d4;
-            --keyword-color: #569cd6;
-            --type-color: #4ec9b0;
-            --string-color: #ce9178;
-            --comment-color: #6a9955;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
             margin: 0;
-            padding: 20px;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 20px;
-        }
-        h1 {
-            color: #4ec9b0;
-            margin-bottom: 5px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .file-box {
-            background-color: var(--panel-bg);
-            border: 1px solid #333;
-            border-radius: 6px;
-            margin-bottom: 25px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background-color: #111;
+            font-family: sans-serif;
+            color: white;
         }
-        .file-header {
-            background-color: #2d2d2d;
-            padding: 10px 15px;
-            font-weight: bold;
-            font-family: monospace;
-            color: #9cdcfe;
-            border-bottom: 1px solid #333;
-        }
-        pre {
-            margin: 0;
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
             padding: 15px;
-            overflow-x: auto;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
+            border-radius: 8px;
+            pointer-events: none;
         }
-        .kw { color: var(--keyword-color); }
-        .type { color: var(--type-color); }
-        .str { color: var(--string-color); }
+        h2 { margin: 0 0 10px 0; color: #f39c12; }
     </style>
+    <!-- Încărcăm Three.js din CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>RomaniaSMP</h1>
-            <p>Codul sursă C# pentru proiectul tău</p>
-        </header>
-
-        <!-- Camera.cs -->
-        <div class="file-box">
-            <div class="file-header">Camera.cs</div>
-            <pre><code><span class="kw">using</span> System.Numerics;
-
-<span class="kw">public class</span> <span class="type">Camera</span>
-{
-    <span class="kw">public</span> <span class="type">Vector3</span> Position;
-    <span class="kw">public float</span> Distance = 6f;
-    <span class="kw">public float</span> Height = 3f;
-
-    <span class="kw">public void</span> Follow(<span class="type">Vector3</span> playerPosition)
-    {
-        Position = <span class="kw">new</span> <span class="type">Vector3</span>(
-            playerPosition.X,
-            playerPosition.Y + Height,
-            playerPosition.Z + Distance
-        );
-    }
-}</code></pre>
-        </div>
-
-        <!-- NPC.cs -->
-        <div class="file-box">
-            <div class="file-header">NPC.cs</div>
-            <pre><code><span class="kw">using</span> System.Numerics;
-
-<span class="kw">public class</span> <span class="type">NPC</span>
-{
-    <span class="kw">public</span> <span class="type">Vector3</span> Position;
-    <span class="kw">public float</span> Speed = 1.5f;
-
-    <span class="kw">public</span> <span class="type">NPC</span>(<span class="type">Vector3</span> position)
-    {
-        Position = position;
-    }
-
-    <span class="kw">public void</span> Update(<span class="kw">float</span> deltaTime)
-    {
-        Position.X += Speed * deltaTime;
-
-        <span class="kw">if</span> (Position.X > 20)
-            Position.X = -20;
-    }
-}</code></pre>
-        </div>
-
-        <!-- Player.cs -->
-        <div class="file-box">
-            <div class="file-header">Player.cs</div>
-            <pre><code><span class="kw">using</span> System.Numerics;
-
-<span class="kw">public class</span> <span class="type">Player</span>
-{
-    <span class="kw">public</span> <span class="type">Vector3</span> Position = <span class="kw">new</span> <span class="type">Vector3</span>(0, 1, 0);
-    <span class="kw">public float</span> Speed = 5f;
-
-    <span class="kw">public void</span> Update(<span class="kw">float</span> deltaTime)
-    {
-        <span class="type">Vector3</span> movement = <span class="type">Vector3</span>.Zero;
-
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"W"</span>))
-            movement.Z -= 1;
-
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"S"</span>))
-            movement.Z += 1;
-
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"A"</span>))
-            movement.X -= 1;
-
-        <span class="kw">if</span> (Input.IsKeyDown(<span class="str">"D"</span>))
-            movement.X += 1;
-
-        <span class="kw">if</span> (movement != <span class="type">Vector3</span>.Zero)
-        {
-            movement = <span class="type">Vector3</span>.Normalize(movement);
-            Position += movement * Speed * deltaTime;
-        }
-    }
-}</code></pre>
-        </div>
-
-        <!-- Program.cs -->
-        <div class="file-box">
-            <div class="file-header">Program.cs</div>
-            <pre><code><span class="kw">using</span> System;
-
-<span class="kw">class</span> <span class="type">Program</span>
-{
-    <span class="kw">static void</span> Main()
-    {
-        <span class="type">World</span> world = <span class="kw">new</span> <span class="type">World</span>();
-
-        Console.WriteLine(<span class="str">"================================"</span>);
-        Console.WriteLine(<span class="str">"       ROMANIA SMP"</span>);
-        Console.WriteLine(<span class="str">"================================"</span>);
-        Console.WriteLine();
-        Console.WriteLine(<span class="str">"Joc pornit!"</span>);
-        Console.WriteLine(<span class="str">"WASD = miscare"</span>);
-        Console.WriteLine();
-
-        <span class="kw">while</span> (<span class="kw">true</span>)
-        {
-            world.Update(0.016f);
-        }
-    }
-}</code></pre>
-        </div>
-
-        <!-- World.cs -->
-        <div class="file-box">
-            <div class="file-header">World.cs</div>
-            <pre><code><span class="kw">using</span> System;
-<span class="kw">using</span> System.Collections.Generic;
-<span class="kw">using</span> System.Numerics;
-
-<span class="kw">public class</span> <span class="type">World</span>
-{
-    <span class="kw">public</span> <span class="type">Player</span> Player;
-    <span class="kw">public</span> <span class="type">Camera</span> Camera;
-    <span class="kw">public</span> <span class="type">List</span>&lt;<span class="type">NPC</span>&gt; NPCs;
-
-    <span class="kw">public</span> <span class="type">World</span>()
-    {
-        Player = <span class="kw">new</span> <span class="type">Player</span>();
-        Camera = <span class="kw">new</span> <span class="type">Camera</span>();
-
-        NPCs = <span class="kw">new</span> <span class="type">List</span>&lt;<span class="type">NPC</span>&gt;();
-
-        <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; 10; i++)
-        {
-            NPCs.Add(
-                <span class="kw">new</span> <span class="type">NPC</span>(<span class="kw">new</span> <span class="type">Vector3</span>(i * 3, 0, 5))
-            );
-        }
-    }
-
-    <span class="kw">public void</span> Update(<span class="kw">float</span> deltaTime)
-    {
-        Player.Update(deltaTime);
-
-        Camera.Follow(Player.Position);
-
-        <span class="kw">foreach</span> (<span class="type">NPC</span> npc <span class="kw">in</span> NPCs)
-        {
-            npc.Update(deltaTime);
-        }
-    }
-}</code></pre>
-        </div>
-
+    <div id="info">
+        <h2>ROMANIA SMP</h2>
+        <p>Joc pornit!</p>
+        <p>Folosește tastele <b>W, A, S, D</b> pentru mișcare.</p>
     </div>
 
+    <script>
+        // --- CLASA PLAYER ---[cite: 3]
+        class Player {
+            constructor() {
+                this.position = new THREE.Vector3(0, 0.5, 0);
+                this.speed = 5;
+                
+                // Creăm reprezentarea vizuală (un cub albastru)
+                const geometry = new THREE.BoxGeometry(1, 1, 1);
+                const material = new THREE.MeshBasicMaterial({ color: 0x3498db });
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.position.copy(this.position);
+            }
+
+            update(deltaTime, keys, bounds) {
+                let movement = new THREE.Vector3(0, 0, 0);
+
+                if (keys['KeyW']) movement.z -= 1;
+                if (keys['KeyS']) movement.z += 1;
+                if (keys['KeyA']) movement.x -= 1;
+                if (keys['KeyD']) movement.x += 1;
+
+                if (movement.length() > 0) {
+                    movement.normalize();
+                    this.position.addScaledVector(movement, this.speed * deltaTime);
+                    this.mesh.position.copy(this.position);
+                }
+            }
+        }
+
+        // --- CLASA NPC ---[cite: 2]
+        class NPC {
+            constructor(position) {
+                this.position = position;
+                this.speed = 1.5;
+
+                // Creăm reprezentarea vizuală (un cub roșu)
+                const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+                const material = new THREE.MeshBasicMaterial({ color: 0xe74c3c });
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.position.copy(this.position);
+            }
+
+            update(deltaTime) {
+                this.position.x += this.speed * deltaTime;
+
+                if (this.position.x > 20) {
+                    this.position.x = -20;
+                }
+
+                this.mesh.position.copy(this.position);
+            }
+        }
+
+        // --- CLASA CAMERA ---[cite: 1]
+        class CameraSystem {
+            constructor(threeCamera) {
+                this.camera = threeCamera;
+                this.distance = 6;
+                this.height = 3;
+            }
+
+            follow(playerPosition) {
+                this.camera.position.set(
+                    playerPosition.x,
+                    playerPosition.y + this.height,
+                    playerPosition.z + this.distance
+                );
+                this.camera.lookAt(playerPosition);
+            }
+        }
+
+        // --- CLASA WORLD ---[cite: 5]
+        class World {
+            constructor(scene) {
+                this.scene = scene;
+                this.player = new Player();
+                this.scene.add(this.player.mesh);
+
+                this.npcs = [];
+                for (let i = 0; i < 10; i++) {
+                    let npc = new NPC(new THREE.Vector3(i * 3 - 15, 0.4, 5));
+                    this.npcs.push(npc);
+                    this.scene.add(npc.mesh);
+                }
+
+                // Podea simplă pentru orientare
+                const floorGeo = new THREE.PlaneGeometry(50, 50);
+                const floorMat = new THREE.MeshBasicMaterial({ color: 0x27ae60, side: THREE.DoubleSide });
+                const floor = new THREE.Mesh(floorGeo, floorMat);
+                floor.rotation.x = Math.PI / 2;
+                floor.position.y = -0.5;
+                this.scene.add(floor);
+            }
+
+            update(deltaTime, keys) {
+                this.player.update(deltaTime, keys);
+
+                for (let npc of this.npcs) {
+                    npc.update(deltaTime);
+                }
+            }
+        }
+
+        // --- CONFIGURARE SCENĂ THREE.JS & GAME LOOP ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const world = new World(scene);
+        const cameraSystem = new CameraSystem(camera);
+
+        // Gestionare taste apăsate
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.code] = true);
+        window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+        // Bucla principală de joc (Game Loop)
+        let lastTime = performance.now();
+
+        function animate(currentTime) {
+            requestAnimationFrame(animate);
+
+            let deltaTime = (currentTime - lastTime) / 1000;
+            if (deltaTime > 0.1) deltaTime = 0.016; // Limitare pentru siguranță
+            lastTime = currentTime;
+
+            // Actualizare lume și cameră[cite: 1, 5]
+            world.update(deltaTime, keys);
+            cameraSystem.follow(world.player.position);
+
+            renderer.render(scene, camera);
+        }
+
+        requestAnimationFrame(animate);
+
+        // Responsivitate la redimensionarea ferestrei
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
